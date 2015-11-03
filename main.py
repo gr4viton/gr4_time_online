@@ -7,6 +7,7 @@
 # https://docs.python.org/2/library/time.html
 
 import time
+import datetime
 import urllib.request
 
 def set_online_time():
@@ -16,13 +17,20 @@ def set_online_time():
     print('Got time [',str_tim,']')
     _win_set_time( time.strptime(str_tim, "b'%Y-%m-%d %H:%M:%S '") )
 
-def _win_set_time(time_tuple):
-    print(time_tuple)
-    import pywin32
+def _win_set_time(struct_time):
+    print('struct_time = "',struct_time,'"')
+    import win32api
     # http://timgolden.me.uk/pywin32-docs/win32api__SetSystemTime_meth.html
-    # pywin32.SetSystemTime(year, month , dayOfWeek , day , hour , minute , second , millseconds )
-    dayOfWeek = datetime.datetime(time_tuple).isocalendar()[2]
-    pywin32.SetSystemTime( time_tuple[:2] + (dayOfWeek,) + time_tuple[2:])
+    # win32api.SetSystemTime(year, month , dayOfWeek , day , hour , minute , second , millseconds )
+    win32api.SetSystemTime(struct_time.tm_year,
+                          struct_time.tm_mon,
+                          struct_time.tm_wday,
+                          struct_time.tm_mday,
+                          struct_time.tm_hour,
+                          struct_time.tm_min,
+                          struct_time.tm_sec,
+                          0
+                          )
 
 if __name__ == '__main__':
     set_online_time()
