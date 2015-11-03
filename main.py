@@ -17,7 +17,10 @@ def set_online_time():
     print('Getting current online time from [', url, ']')
     string_time_online = str( urllib.request.urlopen(url).read() )
     print('Got time [', string_time_online, ']')
-    _win_set_time( time.strptime(string_time_online, "b'%Y-%m-%d %H:%M:%S '") )
+    struct_time_online = time.strptime(string_time_online, "b'%Y-%m-%d %H:%M:%S '")
+    if _win_set_time(struct_time_online) == 0:
+        print('Succesfully updated system time from the internet page [', url, ']')
+        
 
 def _win_set_time(struct_time_online):
     print('struct_time_online [', struct_time_online, ']')
@@ -33,25 +36,29 @@ def _win_set_time(struct_time_online):
                           struct_time_online.tm_sec,
                           0
                           )
-    
+    return 0
+
 def beep_on_difference(struct_time_online, beep_seconds = 5.0):
-
-
-    # beep pc speaker if the time is off more than X seconds
+    """
+    Beep pc speaker if the time is off more than [beep_seconds] seconds
+    """
     tuple_time_system = win32api.GetSystemTime()
     tuple_time_system = tuple(chain(*(tuple_time_system[0:2], tuple_time_system[3:])))
     print('tuple_time_system [', tuple_time_system, ']')
-    # print(sum(tuple_time_system))
-    struct_time_system = datetime.datetime(*tuple_time_system)
-    # struct_time_system = time.mktime(tuple_time_system)
-    # struct_time_system = time.mktime(
+
+    struct_datetime_system = datetime.datetime(*tuple_time_system)
+    struct_time_system = struct_datetime_system.timetuple()
     print('struct_time_system [', struct_time_system, ']')
 
     print(type(struct_time_system), type(struct_time_online))
-    difference = datetime.timedelta(struct_time_online, struct_time_system)
-    print('system to online difference [', difference, ']')
-    if(difference > time.second(beep_seconds)):
-        print
-        print('\7') # functional only when runned through command line ($ python.exe main.py)
+    difference = time.mktime(struct_time_system) - time.mktime(struct_time_online)
+
+    if(abs(difference) > beep_seconds):
+        print('System to online time difference is larger than threshold [',
+              difference, '>', beep_seconds, '] seconds')
+        print('Iniciating beep.\7') # functional only when runned through command line ($ python.exe main.py)
+    else:
+        print('System to online difference [', difference, ']')
+
 if __name__ == '__main__':
     set_online_time()
