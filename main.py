@@ -20,7 +20,8 @@ def set_online_time():
     struct_time_online = time.strptime(string_time_online, "b'%Y-%m-%d %H:%M:%S '")
     if _win_set_time(struct_time_online) == 0:
         print('Succesfully updated system time from the internet page [', url, ']')
-        
+        system_datetime = _datetime_from_tuple_time(win32api.GetSystemTime())
+        print('Current system time is [', system_datetime, ']')
 
 def _win_set_time(struct_time_online):
     print('struct_time_online [', struct_time_online, ']')
@@ -38,27 +39,29 @@ def _win_set_time(struct_time_online):
                           )
     return 0
 
-def beep_on_difference(struct_time_online, beep_seconds = 5.0):
+
+def _datetime_from_tuple_time(tuple_time_system):
+    tuple_time_system = tuple(chain(*(tuple_time_system[0:2], tuple_time_system[3:])))
+    # print('tuple_time_system [', tuple_time_system, ']')
+    return datetime.datetime(*tuple_time_system)
+
+def beep_on_difference(struct_time_online, beep_seconds = 5):
     """
     Beep pc speaker if the time is off more than [beep_seconds] seconds
     """
-    tuple_time_system = win32api.GetSystemTime()
-    tuple_time_system = tuple(chain(*(tuple_time_system[0:2], tuple_time_system[3:])))
-    print('tuple_time_system [', tuple_time_system, ']')
-
-    struct_datetime_system = datetime.datetime(*tuple_time_system)
+    struct_datetime_system = _datetime_from_tuple_time(win32api.GetSystemTime())
     struct_time_system = struct_datetime_system.timetuple()
     print('struct_time_system [', struct_time_system, ']')
 
-    print(type(struct_time_system), type(struct_time_online))
     difference = time.mktime(struct_time_system) - time.mktime(struct_time_online)
 
     if(abs(difference) > beep_seconds):
         print('System to online time difference is larger than threshold [',
-              difference, '>', beep_seconds, '] seconds')
-        print('Iniciating beep.\7') # functional only when runned through command line ($ python.exe main.py)
+              int(difference), '>', beep_seconds, '] seconds')
+        print('Iniciating beep.\7') # functional only when runned from command line ($ python.exe main.py)
     else:
-        print('System to online difference [', difference, ']')
+        print('System to online difference [', int(difference), '] seconds')
 
 if __name__ == '__main__':
     set_online_time()
+
