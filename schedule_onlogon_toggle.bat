@@ -1,7 +1,7 @@
 schtasks /query /tn gr4_time_online_onlogon 
 IF %ERRORLEVEL% EQU 1 (
     ECHO aa
-    schtasks /create /tn gr4_time_online_onlogon /tr gr4_time_online_update.bat /sc onlogon
+    schtasks /create /tn gr4_time_online_onlogon /tr gr4_time_online_update.bat /sc onlogon /V1
     ECHO Task gr4_time_online_onlogon scheduled succesfully
 ) ELSE (
     ECHO Task gr4_time_online_onlogon already scheduled, proceeding to delete the task.
